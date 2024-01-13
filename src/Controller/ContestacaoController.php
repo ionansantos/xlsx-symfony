@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ContestacaoController extends AbstractController
 {
@@ -24,7 +26,7 @@ class ContestacaoController extends AbstractController
    /**
      * @Route("/importarPlanilha", methods={"POST"}, name="importarPlanilha")
      */
-    public function importarPlanilha(Request $request): Response
+    public function importarPlanilha(Request $request, EntityManagerInterface $entityManager ): Response
     {
 
         $erros = [];
@@ -44,7 +46,30 @@ class ContestacaoController extends AbstractController
             $planilha->move($tmpDir, $arquivo);
             $caminhoArquivo = $tmpDir . DIRECTORY_SEPARATOR . $arquivo;
 
-            dd($caminhoArquivo);
+            // dd($caminhoArquivo);
+
+            // ler planilha
+            $spreadSheet = IOFactory::load($caminhoArquivo);
+            $sheet = $spreadSheet->getActiveSheet();
+            $dadosPlanilha = [];
+
+            foreach ($sheet->getRowIterator() as $row) {
+                $rowData = [];
+                foreach ($row->getCellIterator() as $cell) {
+                    $rowData[] = $cell->getValue();
+                }
+                $dadosPlanilha[] = $rowData;
+            }
+
+            dd($dadosPlanilha);
+
+            // processar e armazenar dados no banco
+
+            // $this->processarEArmazenarDados($dadosPlanilha, $entityManager);
+
+            // Remover o arquivo temporário (opcional)
+             unlink($caminhoArquivo);
+
         }
 
         if (count($erros) > 0) {
