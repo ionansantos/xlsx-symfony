@@ -9,16 +9,16 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @API\ApiResource(
  * collectionOperations={
- * "importarXml" ={
+ * "importarPlanilha" ={
  *      "method"="POST",
- *      "path"="/importarXml", 
- *      "controller"="App\Controller\ContestacaoController::importarXml",
+ *      "path"="/importarPlanilha", 
+ *      "controller"="App\Controller\ContestacaoController::importarPlanilha",
  *      "deserialize"=false,
  *  },
- * "exportarXml" = {
+ * "exportarPlanilha" = {
  *      "method" = "GET",
- *      "path"="/exportarXml",
- *      "controller"="App\Controller\ContestacaoController::exportarXml",
+ *      "path"="/exportarPlanilha",
+ *      "controller"="App\Controller\ContestacaoController::exportarPlanilha",
  * }
  * },
  * attributes={

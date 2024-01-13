@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class ContestacaoController extends AbstractController
 {
@@ -21,23 +22,42 @@ class ContestacaoController extends AbstractController
 
     
    /**
-     * @Route("/importarXml", methods={"POST"}, name="importarXml")
+     * @Route("/importarPlanilha", methods={"POST"}, name="importarPlanilha")
      */
-    public function importarXml(Request $request): Response
+    public function importarPlanilha(Request $request): Response
     {
+
+        $erros = [];
         // Obter o arquivo da planilha
         $planilha = $request->files->get('planilhaImportar');
-        dd($planilha);
-        // Faça algo com o arquivo, como movê-lo para um diretório de uploads
-        $diretorioUpload = $this->getParameter('diretorio_upload'); // Substitua pelo seu diretório de uploads
-        $planilha->move($diretorioUpload, $planilha->getClientOriginalName());
+        
+        if(!$planilha) {
+            $erros = ['Selecione um arquivo para importação'];
+        } else {
+            $tmpDir = $this->getParameter('kernel.cache_dir') . '/planilhas-importadas';
 
-        // Exemplo de resposta
-        return new Response('Planilha importada com sucesso!', 200);
+            if(!is_dir($tmpDir)) {
+                mkdir($tmpDir);
+            }
+
+            $arquivo = crc32(random_bytes(4)) . '.' . $planilha->getClientOriginalExtension();
+            $planilha->move($tmpDir, $arquivo);
+            $caminhoArquivo = $tmpDir . DIRECTORY_SEPARATOR . $arquivo;
+
+            dd($caminhoArquivo);
+        }
+
+        if (count($erros) > 0) {
+            return $this->render('contestacao/index.html.twig', [
+                'erros' => $erros,
+            ]);
+        }
+
+        return $this->render('sucesso.html.twig');
     }
 
 
-    public function exportarXml() {
+    public function exportarPlanilha(): Response {
         dd("aqui");
     }
 }
