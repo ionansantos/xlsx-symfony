@@ -67,6 +67,19 @@ class HyperContestacao
      */
     private $usuario;
 
+
+     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $status;
+
+     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $observacao;
+
+
+
     // Métodos Getter e Setter
 
     public function getId(): ?int
@@ -79,7 +92,7 @@ class HyperContestacao
         return $this->mesInicial;
     }
 
-    public function setMesInicial(int $mesInicial): self
+    public function setMesInicial(?int $mesInicial): self
     {
         $this->mesInicial = $mesInicial;
 
@@ -91,7 +104,7 @@ class HyperContestacao
         return $this->anoInicial;
     }
 
-    public function setAnoInicial(int $anoInicial): self
+    public function setAnoInicial(?int $anoInicial): self
     {
         $this->anoInicial = $anoInicial;
 
@@ -103,7 +116,7 @@ class HyperContestacao
         return $this->mesFinal;
     }
 
-    public function setMesFinal(int $mesFinal): self
+    public function setMesFinal(?int $mesFinal): self
     {
         $this->mesFinal = $mesFinal;
 
@@ -115,7 +128,7 @@ class HyperContestacao
         return $this->anoFinal;
     }
 
-    public function setAnoFinal(int $anoFinal): self
+    public function setAnoFinal(?int $anoFinal): self
     {
         $this->anoFinal = $anoFinal;
 
@@ -139,9 +152,33 @@ class HyperContestacao
         return $this->usuario;
     }
 
-    public function setUsuario(string $usuario): self
+    public function setUsuario(?string $usuario): self
     {
         $this->usuario = $usuario;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getObservacao(): ?string
+    {
+        return $this->observacao;
+    }
+
+    public function setObservacao(?string $observacao): self
+    {
+        $this->observacao = $observacao;
 
         return $this;
     }
