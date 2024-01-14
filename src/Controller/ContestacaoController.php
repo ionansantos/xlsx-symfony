@@ -13,6 +13,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ContestacaoController extends AbstractController
 {
+
+    const STATUS_ERRO_ESTRUTURA = 'Erro de Estrutura';
+    const STATUS_EM_ANALISE = 'Em Analise';
+
+    const STATUS_LISTA = [
+        self::STATUS_ERRO_ESTRUTURA,
+        self::STATUS_EM_ANALISE,
+    ];
+
     /**
      * @Route("/contestacao", name="app_contestacao")
      */
@@ -30,6 +39,7 @@ class ContestacaoController extends AbstractController
     public function importarPlanilha(Request $request, EntityManagerInterface $entityManager): Response
     {
         $erros = [];
+
 
         // Obter o arquivo da planilha
         $planilha = $request->files->get('planilhaImportar');
@@ -60,10 +70,8 @@ class ContestacaoController extends AbstractController
                 $dadosPlanilha[] = $rowData;
             }
 
-            // Criar e configurar uma entidade
-            $entity = new HyperContestacao(); // Substitua 'SuaEntidade' pelo nome real da sua entidade
+            $entity = new HyperContestacao(); 
 
-            // Mapear valores da planilha para a entidade
             foreach ($dadosPlanilha as $linha) {
                 $titulo = mb_strtolower($linha[0]);
                 $valor = $linha[1];
@@ -88,25 +96,22 @@ class ContestacaoController extends AbstractController
 
             // Adicionar validações
             if (!$entity->getMesInicial() || !$entity->getAnoInicial()) {
-                $erros[] = 'Mês Inicial e Ano Inicial são obrigatórios.';
-                $entity->setStatus('erro de estrutura');
+                $entity->setStatus(self::STATUS_ERRO_ESTRUTURA);
                 $entity->setObservacao('Mês Inicial e Ano Inicial são obrigatórios.');
             }
 
             // Validar formato do ano
             $anoInicial = $entity->getAnoInicial();
             if (!preg_match('/^\d{4}$/', $anoInicial)) {
-                $erros[] = 'O ano inicial deve ter o formato YYYY (quatro dígitos).';
-                $entity->setStatus('erro de estrutura');
+                $entity->setStatus(self::STATUS_ERRO_ESTRUTURA);
                 $entity->setObservacao('O ano inicial deve ter o formato YYYY (quatro dígitos).');
             }
 
             // Validar range do ano
             $anoAtual = (new \DateTime())->format('Y');
             if ($anoInicial < 2020 || $anoInicial > $anoAtual) {
-                $erros[] = 'O ano inicial deve estar entre 2020 e o ano atual.';
-                $entity->setStatus('erro de estrutura');
-                $entity->setObservacao('O ano inicial deve estar entre 2020 e o ano atual.');
+                $entity->setStatus(self::STATUS_ERRO_ESTRUTURA);
+                $entity->setObservacao('O ano inicial não deverá ser maior que o ano atual');
             }
 
             // Se os valores de mes final e ano final estiverem em branco, assuma os valores iniciais
@@ -130,6 +135,7 @@ class ContestacaoController extends AbstractController
         }
 
         // Persistir a entidade apenas se não houver erros
+        $entity->setStatus(self::STATUS_EM_ANALISE);
         $entityManager->persist($entity);
         $entityManager->flush();
 
