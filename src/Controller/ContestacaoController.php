@@ -32,7 +32,6 @@ class ContestacaoController extends AbstractController
         ]);
     }
 
-    
    /**
      * @Route("/importarPlanilha", methods={"POST"}, name="importarPlanilha")
      */
@@ -94,31 +93,30 @@ class ContestacaoController extends AbstractController
                 }
             }
 
+            $anoInicial = $entity->getAnoInicial();
+            $anoAtual = (new \DateTime())->format('Y');
+
             // Adicionar validações
             if (!$entity->getMesInicial() || !$entity->getAnoInicial()) {
                 $entity->setStatus(self::STATUS_ERRO_ESTRUTURA);
                 $entity->setObservacao('Mês Inicial e Ano Inicial são obrigatórios.');
             }
-
-            // Validar formato do ano
-            $anoInicial = $entity->getAnoInicial();
-            if (!preg_match('/^\d{4}$/', $anoInicial)) {
+            else if (!preg_match('/^\d{4}$/', $anoInicial)) {
                 $entity->setStatus(self::STATUS_ERRO_ESTRUTURA);
                 $entity->setObservacao('O ano inicial deve ter o formato YYYY (quatro dígitos).');
             }
-
-            // Validar range do ano
-            $anoAtual = (new \DateTime())->format('Y');
-            if ($anoInicial < 2020 || $anoInicial > $anoAtual) {
+            else if ($anoInicial < 2020 || $anoInicial > $anoAtual) {
                 $entity->setStatus(self::STATUS_ERRO_ESTRUTURA);
                 $entity->setObservacao('O ano inicial não deverá ser maior que o ano atual');
             }
+            else {
+                $entity->setStatus(self::STATUS_EM_ANALISE);
+            }
 
-            // Se os valores de mes final e ano final estiverem em branco, assuma os valores iniciais
+            // verifica a existencias desses campos , caso nao tiver e atribuido com base em mes_inicial e ano_inicial
             if (!$entity->getMesFinal()) {
                 $entity->setMesFinal($entity->getMesInicial());
             }
-
             if (!$entity->getAnoFinal()) {
                 $entity->setAnoFinal($entity->getAnoInicial());
             }
@@ -135,7 +133,6 @@ class ContestacaoController extends AbstractController
         }
 
         // Persistir a entidade apenas se não houver erros
-        $entity->setStatus(self::STATUS_EM_ANALISE);
         $entityManager->persist($entity);
         $entityManager->flush();
 
